@@ -1,0 +1,12 @@
+<%- include('partials/header'); -%>
+
+
+<form action="/upload" method="post" enctype="multipart/form-data">
+    <h2>New File</h2>
+    <input type="file" name="file" required/>
+    <button type="submit">Add</button>
+</form>
+
+
+
+<%- include('partials/footer'); -%>

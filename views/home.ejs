@@ -1,0 +1,18 @@
+<%- include('partials/header'); -%>
+
+<header>
+  <div class="files">
+    <img src="/fileTrans.png" alt="">
+  </div>
+  <div class="headings">
+    <h2>ShareVault</h2>
+    <h3>Where Files Meet Collaboration</h3>
+    <% if(user){ %>
+    <a href="/myuploads" class="btn">My Uploads</a>
+    <a href="/shared" class="btn">Shared</a>
+    <% } %>
+  </div>
+</header>
+
+
+<%- include('partials/footer'); -%>

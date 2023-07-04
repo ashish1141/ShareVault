@@ -1,0 +1,67 @@
+<%- include('partials/header'); -%>
+
+
+<button><a href="/upload">Upload New File</a></button>
+
+<ul class="filetemps">
+  <% for(let i=0 ; i < userFiles.length ; i++){ %>
+
+  <li class="filetemp">
+    <img src="/fileTrans.png" alt="fileTrans icon">
+    <h4><%= userFiles[i].originalName %></h4>
+    <button onclick="downloadFile('<%= userFiles[i]._id %>')">Download</button>
+    <button onclick="deleteFile('<%= userFiles[i]._id %>')">Delete</button>
+    <button onclick="renameFile('<%= userFiles[i]._id %>')">Rename</button>
+    <button onclick="shareFile('<%= userFiles[i]._id %>')">Share</button>
+  </li>
+
+  <% } %>
+</ul>
+
+<script>
+ 
+  const downloadFile = async (fileId) => {
+    window.location.href = `/download?fileId=${fileId}`;
+  }
+
+  const deleteFile = async (fileId) => {
+    if(confirm("delete file ?"))
+    window.location.href = `/delete?fileId=${fileId}`;
+  }
+
+  const renameFile = async (fileId) =>{
+    const newName = prompt("Enter New name for the fime");
+    console.log(newName);
+    if(newName)
+    {
+      window.location.href = `/rename?fileId=${fileId}&newName=${newName}`;
+    }
+  }
+
+  const shareFile = async (fileId) => {
+  const userEmails = prompt("Enter email addresses of recipients (comma-separated):").split(',');
+  if (userEmails) {
+    await fetch(`/share/${fileId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ userEmails: userEmails })
+    })
+      .then(response => {
+        if (response.ok) {
+          alert('File shared successfully');
+        } else {
+          console.error('Error sharing file:', response.statusText);
+        }
+      })
+      .catch(error => {
+        console.error('Error sharing file:', error);
+      });
+  }
+}
+
+
+</script>
+
+<%- include('partials/footer'); -%>
