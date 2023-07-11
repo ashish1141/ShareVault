@@ -1,0 +1,18 @@
+ <%- include('partials/header'); -%>
+
+ <ul class="filetemps">
+    <% for(let i=0 ; i < sharedFiles.length ; i++){ %>
+  
+    <li class="filetemp">
+      <img src="/fileTrans.png" alt="fileTrans icon">
+      <h4><%= sharedFiles[i].originalName %></h4>
+      <h6>shared By: <%= sharedFiles[i].userId.email %></h6>
+      <button onclick="downloadFile('<%= sharedFiles[i]._id %>')">Download</button>
+      <button onclick="removeFile('<%= sharedFiles[i]._id %>')">Remove</button>
+    </li>
+  
+    <% } %>
+</ul>
+
+
+ <%- include('partials/footer'); -%>

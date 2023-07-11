@@ -222,5 +222,9 @@ app.post("/share/:fileId", async (req, res) => {
 // shared get route shows the files shared with user
 
 app.get("/shared",requireAuth,checkUser, async (req,res) =>{
-  
-});
+
+  const sharedFiles = await File.find({sharedWith : req.userId}).populate('userId');
+
+  res.render("shared",{sharedFiles});
+
+}); 
