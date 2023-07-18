@@ -15,7 +15,15 @@ const fileSchema = new mongoose.Schema({
     sharedWith: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
-    }]
+    }],
+    sharedLinkActive: {
+      type: Boolean,
+      default: false
+    },
+    token: {
+      type: String,
+      unique: true
+    }
   });
 
 

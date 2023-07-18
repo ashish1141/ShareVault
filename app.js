@@ -227,4 +227,128 @@ app.get("/shared",requireAuth,checkUser, async (req,res) =>{
 
   res.render("shared",{sharedFiles});
 
-}); 
+});
+
+app.get("/sharedbyme",requireAuth,checkUser, async (req,res) =>{
+
+  const sharedFiles = await File.find({userId : req.userId , shared : true});
+  // console.log(sharedFiles);
+
+  res.render("sharedbyme",{sharedFiles});
+});
+
+
+app.put('/remove-share/:fileId', async (req, res) => {
+  try {
+    const fileId = req.params.fileId;
+    const userId = req.userId;
+
+    const file = await File.findOne({ _id: fileId, userId: req.userId });
+
+    if (!file) {
+      return res.status(404).send('File not found');
+    }
+
+    const sharedWithIndex = file.sharedWith.indexOf(userId);
+
+    if (sharedWithIndex === -1) {
+      return res.status(400).send('User ID not found in sharedWith array');
+    }
+
+    file.sharedWith.splice(sharedWithIndex, 1);
+    await file.save();
+
+    res.send('User removed');
+  } catch (error) {
+    console.error('Error removing user', error);
+    res.status(500).send('Error removing user');
+  }
+});
+
+
+
+
+//  shareable link routes
+const { v4: uuidv4 } = require('uuid');
+
+
+
+app.post('/shareLink/:fileId',checkUser, async (req, res) => {
+  try {
+    const fileId = req.params.fileId;
+    
+    const file = await File.findOne({ _id: fileId, userId: req.userId });
+
+    if (!file) {
+      return res.status(404).send('File not found');
+    }
+
+    if (file.sharedLinkActive) {
+      return res.status(400).send('File already shared');
+    }
+
+    const token = uuidv4(); // Generate a unique token using the uuid library
+
+    file.sharedLinkActive = true;
+    file.token = token;
+    await file.save();
+
+    const shareLink = `${req.protocol}://${req.get('host')}/download/${token}`;
+
+    res.send(shareLink);
+  } catch (error) {
+    console.error('Error sharing file', error);
+    res.status(500).send('Error sharing file');
+  }
+});
+
+
+
+app.get('/download/:token', async (req, res) => {
+  try {
+    const token = req.params.token;
+    const file = await File.findOne({ token });
+
+    if (!file) {
+      return res.status(404).send('File not found');
+    }
+
+    const filePath = path.join(__dirname, file.filePath);
+
+    res.download(filePath, file.originalName, (err) => {
+      if (err) {
+        console.error('Error downloading file:', err);
+        res.status(500).send('Error downloading file');
+      }
+    });
+  } catch (error) {
+    console.error('Error accessing shared file', error);
+    res.status(500).send('Error accessing shared file');
+  }
+});
+
+
+app.get('/disable-share/:fileId',checkUser, async (req, res) => {
+  try {
+    const fileId = req.params.fileId;
+    const file = await File.findOne({ _id: fileId, userId: req.userId });
+
+    if (!file) {
+      return res.status(404).send('File not found');
+    }
+
+    if (!file.sharedLinkActive) {
+      return res.status(400).send('File is not shared');
+    }
+
+    file.sharedLinkActive = false;
+    file.token = undefined;
+    await file.save();
+
+    res.send('Sharable link disabled');
+  } catch (error) {
+    console.error('Error disabling sharable link', error);
+    res.status(500).send('Error disabling sharable link');
+  }
+});
+

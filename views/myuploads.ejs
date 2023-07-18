@@ -13,6 +13,7 @@
     <button onclick="deleteFile('<%= userFiles[i]._id %>')">Delete</button>
     <button onclick="renameFile('<%= userFiles[i]._id %>')">Rename</button>
     <button onclick="shareFile('<%= userFiles[i]._id %>')">Share</button>
+    <button onclick="shareLink('<%= userFiles[i]._id %>')">Create Link</button>
   </li>
 
   <% } %>
@@ -40,26 +41,54 @@
 
   const shareFile = async (fileId) => {
   const userEmails = prompt("Enter email addresses of recipients (comma-separated):").split(',');
-  if (userEmails) {
-    await fetch(`/share/${fileId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ userEmails: userEmails })
-    })
+    if (userEmails) {
+      await fetch(`/share/${fileId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userEmails: userEmails })
+      })
+        .then(response => {
+          if (response.ok) {
+            alert('File shared successfully');
+          } else {
+            console.error('Error sharing file:', response.statusText);
+          }
+        })
+        .catch(error => {
+          console.error('Error sharing file:', error);
+        });
+    }
+  }
+
+
+  const shareLink = async (fileId) => {
+    const createLink = confirm('create a share link? Other people with link will be able to download the file.');
+    if(createLink)
+    {
+      await fetch(`/sharelink/${fileId}`, {
+        method: 'POST',
+        headers: {
+          'content-Type': 'application/json'
+        }
+      })
       .then(response => {
         if (response.ok) {
-          alert('File shared successfully');
+          return response.text(); 
         } else {
-          console.error('Error sharing file:', response.statusText);
+          throw new Error('Error sharing file: ' + response.statusText);
         }
+      })
+      .then(shareLink => {
+        console.log(shareLink);
+        alert('Sharable link for this file is: ' + shareLink);
       })
       .catch(error => {
         console.error('Error sharing file:', error);
       });
+    }
   }
-}
 
 
 </script>
