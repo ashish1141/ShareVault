@@ -23,6 +23,10 @@ const fileSchema = new mongoose.Schema({
     token: {
       type: String,
       unique: true
+    },
+    deletedAt: {
+      type: Date,
+      default: null
     }
   });
 

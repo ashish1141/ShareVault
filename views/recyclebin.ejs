@@ -1,0 +1,49 @@
+<%- include('partials/header'); -%>
+
+<ul class="filetemps">
+    <% for(let i=0 ; i < deletedFiles.length ; i++){ %>
+  
+    <li class="filetemp">
+      <img src="/fileTrans.png" alt="fileTrans icon">
+      <h4><%= deletedFiles[i].originalName %></h4>
+      <button onclick="DeletePermanent('<%= deletedFiles[i]._id %>')">Delete Premanently</button>
+      <button onclick="Restore('<%= deletedFiles[i]._id %>')">Restore</button>
+    </li>
+  
+    <% } %>
+</ul>
+
+<script>
+    const DeletePermanent = async (fileId) => {
+        if(confirm('file will be deleted permanentaly and cannot be retrieved. Are you sure You want to delete it?'))
+        {
+            window.location.href = `/permanentDelete?fileId=${fileId}`;
+        }
+    }
+
+    const Restore = async (fileId) => {
+        if(confirm('Restore file?'))
+        {
+            await fetch(`/restore?fileId=${fileId}`,{
+                method: 'PUT',
+                headers : {
+                    'content-type' : 'application/json'
+                }
+            })
+            .then(response => {
+                if(response.ok)
+                {
+                    alert('File sucessfully Resored');
+                    location.assign('/recycleBin');
+                } else {
+                console.error('Error Restoreing file:', response.statusText);
+                }
+            })
+            .catch(error => {
+                console.error('Error Restoreing file:', error);
+            });
+        }
+    }
+</script>
+
+<%- include('partials/footer'); -%>

@@ -15,4 +15,33 @@
 </ul>
 
 
+<script>
+  const downloadFile = async (fileId) => {
+    window.location.href = `/download?fileId=${fileId}&userId=user._id`;
+  }
+  const removeFile = async (fileId) => {
+    if(confirm('You will no longer be able to access this file. Remove from shared?'))
+    {
+      await fetch(`/remove-share?fileId=${fileId}`,{
+          method: 'PUT',
+          headers : {
+              'content-type' : 'application/json'
+          }
+      })
+      .then(response => {
+          if(response.ok)
+          {
+              alert('File sucessfully Removed');
+              location.assign('/shared');
+          } else {
+          console.error('Error Removeing file:', response.statusText);
+          }
+      })
+      .catch(error => {
+          console.error('Error Removeing file:', error);
+      });
+    }
+  }
+</script>
+
  <%- include('partials/footer'); -%>

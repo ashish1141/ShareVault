@@ -22,12 +22,32 @@
 <script>
  
   const downloadFile = async (fileId) => {
-    window.location.href = `/download?fileId=${fileId}`;
+    window.location.href = `/download?fileId=${fileId}&userId=user._id`;
   }
 
   const deleteFile = async (fileId) => {
-    if(confirm("delete file ?"))
-    window.location.href = `/delete?fileId=${fileId}`;
+    const confirmDelete = confirm("move to recycle bin? file will be automatically deleted after 30 days.")
+    if(confirmDelete)
+    {
+      await fetch(`/delete?fileId=${fileId}`,{
+          method: 'GET',
+          headers : {
+              'content-type' : 'application/json'
+          }
+      })
+      .then(response => {
+          if(response.ok)
+          {
+              alert('File sucessfully Moved to Recycle Bin And will be deleted in 30 days');
+              location.assign('/myuploads');
+          } else {
+          console.error('Error deleteing file:', response.statusText);
+          }
+      })
+      .catch(error => {
+          console.error('Error deleteing file:', error);
+      });
+    }
   }
 
   const renameFile = async (fileId) =>{
