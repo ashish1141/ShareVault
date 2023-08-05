@@ -17,7 +17,24 @@
     const DeletePermanent = async (fileId) => {
         if(confirm('file will be deleted permanentaly and cannot be retrieved. Are you sure You want to delete it?'))
         {
-            window.location.href = `/permanentDelete?fileId=${fileId}`;
+            await fetch(`/permanentDelete?fileId=${fileId}`,{
+                method: 'GET',
+                headers : {
+                    'content-type' : 'application/json'
+                }
+            })
+            .then(response => {
+                if(response.ok)
+                {
+                    alert('File sucessfully Deleted');
+                    location.assign('/recycleBin');
+                } else {
+                console.error('Error deleteing file:', response.statusText);
+                }
+            })
+            .catch(error => {
+                console.error('Error deleteing file:', error);
+            });
         }
     }
 

@@ -162,15 +162,12 @@ app.post("/share/:fileId", async (req, res) => {
     const fileId = req.params.fileId;
     const { userEmails } = req.body;
 
-    
-    // Find the file by ID
     const file = await File.findById(fileId);
 
     if (!file) {
       return res.status(404).send('File not found');
     }
 
-    // Find the users by email addresses
     const users = await User.find({ email: { $in: userEmails } });
 
     if (!users || users.length === 0) {
@@ -251,7 +248,6 @@ app.put('/remove-share', checkUser, async (req, res) => {
 const { v4: uuidv4 } = require('uuid');
 
 
-
 app.post('/shareLink/:fileId',checkUser, async (req, res) => {
   try {
     const fileId = req.params.fileId;
@@ -263,7 +259,8 @@ app.post('/shareLink/:fileId',checkUser, async (req, res) => {
     }
 
     if (file.sharedLinkActive) {
-      return res.status(400).send('File already shared');
+      const shareLink = `${req.protocol}://${req.get('host')}/download/${file.token}`;
+      res.send(shareLink);
     }
 
     const token = uuidv4(); // Generate a unique token using the uuid library
@@ -307,8 +304,9 @@ app.get('/download/:token', async (req, res) => {
 });
 
 
-app.get('/disable-share/:fileId',checkUser, async (req, res) => {
+app.post('/disable-shareLink/:fileId',checkUser, async (req, res) => {
   try {
+    // console.log('check');
     const fileId = req.params.fileId;
     const file = await File.findOne({ _id: fileId, userId: req.userId });
 
@@ -330,6 +328,31 @@ app.get('/disable-share/:fileId',checkUser, async (req, res) => {
     res.status(500).send('Error disabling sharable link');
   }
 });
+
+
+// get Active Links
+
+app.get('/ActiveLinks', checkUser, async (req, res) => {
+  // console.log(req.userId);
+  try{
+    const files = await File.find({userId : req.userId, sharedLinkActive : true});
+    // console.log(files);
+    const activeLinks = files.map(file => {
+      return {
+        fileName : file.originalName,
+        link: `${req.protocol}://${req.get('host')}/download/${file.token}`,
+        fileId: file._id
+      };
+    });
+
+    res.render('ActiveLinks',{activeLinks});
+
+  } catch (error) {
+    console.error('Error fetching active links:', error);
+    res.status(500).send('Error fetching active links');
+  }
+});
+
 
 //////////////////////////////////////RECYCLE BIN//////////////////////////////////////////////////////////////
 

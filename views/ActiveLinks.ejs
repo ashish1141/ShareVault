@@ -1,0 +1,71 @@
+<%- include('partials/header') -%>
+
+<style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ccc;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+
+
+<h1>Active Links</h1>
+
+  <table>
+    <tr>
+      <th>File Name</th>
+      <th>Link</th>
+      <th>Copy</th>
+      <th>Disable</th>
+    </tr>
+
+    <% for (let i = 0; i < activeLinks.length; i++) { %>
+      <tr>
+        <td><%= activeLinks[i].fileName %></td>
+        <td class="link"><%= activeLinks[i].link %></td>
+        <td><button class="button" onclick="CopyText('<%= activeLinks[i].link %>')">Copy</button></td>
+        <td><button class="button" onclick="DisableLink('<%= activeLinks[i].fileId %>')">Disable</button></td>
+      </tr>
+    <% } %>
+  </table>
+
+<script>
+    const DisableLink = async (fileId) => {
+        await fetch(`/disable-shareLink/${fileId}`, {
+            method : 'POST',
+            headers : {
+                'content-Type' : 'application/json'
+            }
+        })
+        .then(response => {
+            if(response.ok) {
+                alert('share Link has been diabled and anyone with the link cannot be able access the file anymore');
+                window.location.href = '/ActiveLinks';
+            } else {
+                console.error('Error Disabling link:', response.statusText);
+            }
+        })
+    }
+
+    const CopyText = (text) => {
+      const tempInput = document.createElement('input');
+      tempInput.setAttribute('value', text);
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempInput);
+      alert('link copied to clipboard')
+    };
+
+</script>
+
+<%- include('partials/footer') -%>
